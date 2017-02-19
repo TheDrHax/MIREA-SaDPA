@@ -7,6 +7,8 @@
 
 #include <iostream>
 
+using namespace std;
+
 /**
  * Внутренняя структура
  */
@@ -100,73 +102,6 @@ class Stack {
 };
 
 /**
- * Очередь (чистая реализация)
- */
-class Queue {
-    private:
-        /**
-         * Указатели на первый и последний элементы
-         */
-        Node *first, *last;
-
-        /**
-         * Текущая длина очереди
-         */
-        int length = 0;
-
-    public:
-        ~Queue() {
-            // Удаляем все оставшиеся элементы
-            while (length > 0) {
-                pop();
-            }
-        }
-
-        /**
-         * Возвращает текущую длину очереди
-         * @return длина очереди
-         */
-        int size() {
-            return length;
-        }
-
-        /**
-         * Помещает новый элемент в конец очереди
-         * @param a Значение нового элемента
-         */
-        void push(int a) {
-            if (length == 0) {
-                first = last = new Node;
-                first->data = a;
-            } else {
-                Node *last_old = last;
-                last = new Node;
-                last->data = a;
-                last->previous = last_old;
-                last->previous->next = last;
-            }
-            length++;
-        }
-
-        /**
-         * Забирает первый элемент из очереди
-         * @return значение элемента
-         */
-        int pop() {
-            if (length == 0) {
-                return -1;
-            }
-            length--;
-
-            Node *first_old = first;
-            int data = first_old->data;
-            first = first->next;
-            delete first_old;
-            return data;
-        }
-};
-
-/**
  * Очередь (реализация на двух стеках)
  * @see Stack
  */
@@ -209,44 +144,54 @@ class StackedQueue : public Stack {
 };
 
 int main(int argc, char **argv) {
-    Stack *stack = new Stack;
-    stack->push(1);
-    stack->push(2);
-    stack->push(3);
+    StackedQueue *queue = new StackedQueue;
+    bool running = true;
+    int answer = 0;
 
-    std::cout << "Stack test:" << std::endl;
-    while (stack->size() > 0) {
-        std::cout << stack->pop() << std::endl;
+    while (running) {
+        cout << "0. exit" << endl;
+        cout << "1. push" << endl;
+        cout << "2. pop" << endl;
+        cout << "3. pick" << endl;
+        cout << "Please choose the next action: ";
+
+        cin >> answer;
+        switch (answer) {
+            case 1:
+                cout << "Please enter a number: ";
+                cin >> answer;
+                queue->push(answer);
+                cout << endl << "Pushed: " << answer << endl;
+                break;
+            case 2:
+                if (queue->size() > 0) {
+                    cout << endl << "Popped: " << queue->pop() << endl;
+                } else {
+                    cout << endl << "Queue is empty! (╯°□°）╯︵ ┻━┻" << endl;
+                }
+                break;
+            case 3:
+                if (queue->size() > 0) {
+                    cout << endl << "Picked: " << queue->pick() << endl;
+                } else {
+                    cout << endl << "Queue is empty! (╯°□°）╯︵ ┻━┻" << endl;
+                }
+                break;
+            default:
+                running = false;
+                break;
+        }
+        cout << endl << "Press Enter to continue..." << endl;
+
+        /**
+         * Ждём, пока пользователь нажмёт Enter
+         */
+        string tmp;
+        cin.ignore(); // чистим буффер ввода
+        getline(cin, tmp); // ждём
     }
-    std::cout << std::endl;
-
-    delete stack;
-
-    Queue *queue = new Queue;
-    queue->push(1);
-    queue->push(2);
-    queue->push(3);
-
-    std::cout << "Queue test:" << std::endl;
-    while (queue->size() > 0) {
-        std::cout << queue->pop() << std::endl;
-    }
-    std::cout << std::endl;
 
     delete queue;
-
-    StackedQueue *squeue = new StackedQueue;
-    squeue->push(1);
-    squeue->push(2);
-    squeue->push(3);
-
-    std::cout << "StackedQueue test:" << std::endl;
-    while (squeue->size() > 0) {
-        std::cout << squeue->pop() << std::endl;
-    }
-    std::cout << std::endl;
-
-    delete squeue;
 
     return 0;
 }
