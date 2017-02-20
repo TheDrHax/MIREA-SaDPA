@@ -1,7 +1,7 @@
 /**
  * Практическое задание 1 (сложный вариант, очередь AAA)
  *
- * @author Dmitry Karikh <the.dr.hax@gmail.com>
+ * @author Dmitry Karikh <the.dr.hax@gmail.com>, ISBOp-01-14
  * @see <a href="https://vk.com/doc-76267187_442123883?hash=db6e91f00542c3b141&dl=8e2648ac6abfb288ce">ПР1.pdf</a>
  */
 
