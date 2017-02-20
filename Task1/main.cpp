@@ -37,9 +37,12 @@ class Stack {
         /**
          * Текущая высота стека
          */
-        int length = 0;
+        int length;
 
     public:
+        Stack() {
+            length = 0;
+        }
         ~Stack() {
             // Удаляем все оставшиеся элементы
             while (length > 0) {
