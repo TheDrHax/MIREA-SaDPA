@@ -24,7 +24,7 @@ struct Node {
     /**
      * Указатели на соседние структуры
      */
-    Node *previous, *next;
+    Node *next;
 };
 
 /**
