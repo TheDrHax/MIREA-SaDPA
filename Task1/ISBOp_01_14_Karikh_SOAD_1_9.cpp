@@ -1,8 +1,11 @@
 /**
- * Практическое задание 1 (сложный вариант, очередь AAA)
+ * ISBOp_01_14_Karikh_SOAD_1_9.cpp
  *
- * @author Dmitry Karikh <the.dr.hax@gmail.com>, ISBOp-01-14
- * @see <a href="https://vk.com/doc-76267187_442123883?hash=db6e91f00542c3b141&dl=8e2648ac6abfb288ce">ПР1.pdf</a>
+ * Практическое задание 1 (https://vk.com/doc-76267187_442123883)
+ * Вариант 9
+ *
+ * Карих Дмитрий, ИСБОп-01-14
+ * https://github.com/TheDrHax/MIREA-SaDPA
  */
 
 #include <iostream>
@@ -148,8 +151,8 @@ class StackedQueue : public Stack {
 
 int main(int argc, char **argv) {
     StackedQueue *queue = new StackedQueue;
-    bool running = true;
-    int answer = 0;
+    bool running = true; // условие для остановки бесконечного цикла
+    int answer = 0; // ответ пользователя
 
     while (running) {
         cout << "0. exit" << endl;
@@ -166,6 +169,7 @@ int main(int argc, char **argv) {
                 queue->push(answer);
                 cout << endl << "Pushed: " << answer << endl;
                 break;
+
             case 2:
                 if (queue->size() > 0) {
                     cout << endl << "Popped: " << queue->pop() << endl;
@@ -173,6 +177,7 @@ int main(int argc, char **argv) {
                     cout << endl << "Queue is empty! (╯°□°）╯︵ ┻━┻" << endl;
                 }
                 break;
+
             case 3:
                 if (queue->size() > 0) {
                     cout << endl << "Picked: " << queue->pick() << endl;
@@ -180,6 +185,7 @@ int main(int argc, char **argv) {
                     cout << endl << "Queue is empty! (╯°□°）╯︵ ┻━┻" << endl;
                 }
                 break;
+
             default:
                 running = false;
                 break;
@@ -188,6 +194,7 @@ int main(int argc, char **argv) {
 
         /**
          * Ждём, пока пользователь нажмёт Enter
+         * (system("PAUSE") всё-равно не работает без cin.ignore())
          */
         string tmp;
         cin.ignore(); // чистим буффер ввода
