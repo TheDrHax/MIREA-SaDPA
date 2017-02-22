@@ -39,16 +39,10 @@ class Stack {
          * Помещает новый элемент в вершину стека
          */
         void push(int a) {
-            if (top == NULL) {
-                top = new Node;
-                top->next = NULL;
-                top->data = a;
-            } else {
-                Node *top_old = top;
-                top = new Node;
-                top->data = a;
-                top->next = top_old;
-            }
+            Node *top_old = top;
+            top = new Node;
+            top->data = a;
+            top->next = top_old;
         }
 
         /**
