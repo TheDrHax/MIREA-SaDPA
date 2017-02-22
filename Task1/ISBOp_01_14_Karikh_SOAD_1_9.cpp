@@ -56,7 +56,7 @@ class Stack {
          */
         int pop() {
             if (top == NULL) {
-                return -1;
+                throw "Stack is empty! (╯°□°）╯︵ ┻━┻";
             }
 
             Node *top_old = top;
@@ -71,7 +71,7 @@ class Stack {
          */
         int pick() {
             if (top == NULL) {
-                return -1;
+                throw "Stack is empty! (╯°□°）╯︵ ┻━┻";
             }
             return top->data;
         }
@@ -102,8 +102,12 @@ class StackedQueue : public Stack {
         void push(int a) {
             // Переносим основной стек в обратный
             // (с обратным порядком элементов)
-            while (pick() != -1) {
-                backward->push(pop());
+            while (true) {
+                try {
+                    backward->push(pop());
+                } catch (const char *ex) {
+                    break;
+                }
             }
 
             // Обращаемся к методу push() родительского
@@ -111,8 +115,12 @@ class StackedQueue : public Stack {
             Stack::push(a); // добавляем новый элемент
 
             // Возвращаем все элементы из обратного стека в основной
-            while (backward->pick() != -1) {
-                Stack::push(backward->pop());
+            while (true) {
+                try {
+                    Stack::push(backward->pop());
+                } catch (const char *ex) {
+                    break;
+                }
             }
         }
 };
@@ -140,24 +148,20 @@ int main(int argc, char **argv) {
                 break;
 
             case 2:
-                if (queue->pick() != -1) {
+                try {
                     std::cout << std::endl << "Popped: "
                               << queue->pop() << std::endl;
-                } else {
-                    std::cout << std::endl
-                              << "Queue is empty! (╯°□°）╯︵ ┻━┻"
-                              << std::endl;
+                } catch (const char *ex) {
+                    std::cout << std::endl << ex << std::endl;
                 }
                 break;
 
             case 3:
-                if (queue->pick() != -1) {
+                try {
                     std::cout << std::endl << "Picked: "
                               << queue->pick() << std::endl;
-                } else {
-                    std::cout << std::endl
-                              << "Queue is empty! (╯°□°）╯︵ ┻━┻"
-                              << std::endl;
+                } catch (const char *ex) {
+                    std::cout << std::endl << ex << std::endl;
                 }
                 break;
 
