@@ -10,8 +10,6 @@
 
 #include <iostream>
 
-using namespace std;
-
 /**
  * Элемент для хранения данных
  */
@@ -26,31 +24,24 @@ struct Node {
 class Stack {
     private:
         Node *top; // указатель на вершину стека
-        int length; // текущая высота стека
 
     public:
         Stack() {
-            length = 0;
+            top = NULL;
         }
         ~Stack() {
-            while (length > 0) {
+            while (top != NULL) {
                 pop(); // удаляет элемент, запрашивая его значение
             }
-        }
-
-        /**
-         * Возвращает текущую высоту стека
-         */
-        int size() {
-            return length;
         }
 
         /**
          * Помещает новый элемент в вершину стека
          */
         void push(int a) {
-            if (length == 0) {
+            if (top == NULL) {
                 top = new Node;
+                top->next = NULL;
                 top->data = a;
             } else {
                 Node *top_old = top;
@@ -58,17 +49,15 @@ class Stack {
                 top->data = a;
                 top->next = top_old;
             }
-            length++;
         }
 
         /**
          * Забирает элемент из вершины стека
          */
         int pop() {
-            if (length == 0) {
+            if (top == NULL) {
                 return -1;
             }
-            length--;
 
             Node *top_old = top;
             int data = top->data;
@@ -81,7 +70,7 @@ class Stack {
          * Считывает элемент без его удаления
          */
         int pick() {
-            if (length == 0) {
+            if (top == NULL) {
                 return -1;
             }
             return top->data;
@@ -113,7 +102,7 @@ class StackedQueue : public Stack {
         void push(int a) {
             // Переносим основной стек в обратный
             // (с обратным порядком элементов)
-            while (size() > 0) {
+            while (pick() != -1) {
                 backward->push(pop());
             }
 
@@ -122,7 +111,7 @@ class StackedQueue : public Stack {
             Stack::push(a); // добавляем новый элемент
 
             // Возвращаем все элементы из обратного стека в основной
-            while (backward->size() > 0) {
+            while (backward->pick() != -1) {
                 Stack::push(backward->pop());
             }
         }
@@ -134,34 +123,41 @@ int main(int argc, char **argv) {
     int answer = 0; // ответ пользователя
 
     while (running) {
-        cout << "0. exit" << endl;
-        cout << "1. push" << endl;
-        cout << "2. pop" << endl;
-        cout << "3. pick" << endl;
-        cout << "Please choose the next action: ";
+        std::cout << "0. exit" << std::endl;
+        std::cout << "1. push" << std::endl;
+        std::cout << "2. pop" << std::endl;
+        std::cout << "3. pick" << std::endl;
+        std::cout << "Please choose the next action: ";
 
-        cin >> answer;
+        std::cin >> answer;
         switch (answer) {
             case 1:
-                cout << "Please enter a number: ";
-                cin >> answer;
+                std::cout << "Please enter a number: ";
+                std::cin >> answer;
                 queue->push(answer);
-                cout << endl << "Pushed: " << answer << endl;
+                std::cout << std::endl << "Pushed: "
+                          << answer << std::endl;
                 break;
 
             case 2:
-                if (queue->size() > 0) {
-                    cout << endl << "Popped: " << queue->pop() << endl;
+                if (queue->pick() != -1) {
+                    std::cout << std::endl << "Popped: "
+                              << queue->pop() << std::endl;
                 } else {
-                    cout << endl << "Queue is empty! (╯°□°）╯︵ ┻━┻" << endl;
+                    std::cout << std::endl
+                              << "Queue is empty! (╯°□°）╯︵ ┻━┻"
+                              << std::endl;
                 }
                 break;
 
             case 3:
-                if (queue->size() > 0) {
-                    cout << endl << "Picked: " << queue->pick() << endl;
+                if (queue->pick() != -1) {
+                    std::cout << std::endl << "Picked: "
+                              << queue->pick() << std::endl;
                 } else {
-                    cout << endl << "Queue is empty! (╯°□°）╯︵ ┻━┻" << endl;
+                    std::cout << std::endl
+                              << "Queue is empty! (╯°□°）╯︵ ┻━┻"
+                              << std::endl;
                 }
                 break;
 
@@ -169,15 +165,16 @@ int main(int argc, char **argv) {
                 running = false;
                 break;
         }
-        cout << endl << "Press Enter to continue..." << endl;
+        std::cout << std::endl << "Press Enter to continue..."
+                  << std::endl;
 
         /**
          * Ждём, пока пользователь нажмёт Enter
          * (system("PAUSE") всё-равно не работает без cin.ignore())
          */
-        string tmp;
-        cin.ignore(); // чистим буффер ввода
-        getline(cin, tmp); // ждём
+        std::string tmp;
+        std::cin.ignore(); // чистим буффер ввода
+        getline(std::cin, tmp); // ждём
     }
 
     delete queue;
