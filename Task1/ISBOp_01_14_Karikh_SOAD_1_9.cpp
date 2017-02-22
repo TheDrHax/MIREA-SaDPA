@@ -83,19 +83,12 @@ class Stack {
 class StackedQueue : public Stack {
     private:
         /**
-         * Указатель на обратный стек, использующийся для реорганизации
+         * Обратный стек, использующийся для реорганизации
          * основного стека во время добавления элементов.
          */
-        Stack *backward;
+        Stack backward;
 
     public:
-        StackedQueue() {
-            backward = new Stack;
-        }
-        ~StackedQueue() {
-            delete backward;
-        }
-
         /**
          * Помещает новый элемент в очередь
          */
@@ -104,7 +97,7 @@ class StackedQueue : public Stack {
             // (с обратным порядком элементов)
             while (true) {
                 try {
-                    backward->push(pop());
+                    backward.push(pop());
                 } catch (const char *ex) {
                     break;
                 }
@@ -117,7 +110,7 @@ class StackedQueue : public Stack {
             // Возвращаем все элементы из обратного стека в основной
             while (true) {
                 try {
-                    Stack::push(backward->pop());
+                    Stack::push(backward.pop());
                 } catch (const char *ex) {
                     break;
                 }
