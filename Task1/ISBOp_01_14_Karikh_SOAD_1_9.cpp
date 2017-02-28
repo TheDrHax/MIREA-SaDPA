@@ -30,9 +30,16 @@ class Stack {
             top = NULL;
         }
         ~Stack() {
-            while (top != NULL) {
-                pop(); // удаляет элемент, запрашивая его значение
+            while (!isEmpty()) {
+                drop(); // удаляет элемент
             }
+        }
+
+        /**
+         * Определяет, остались ли в стеке элементы
+         */
+        bool isEmpty() {
+            return (top == NULL);
         }
 
         /**
@@ -46,28 +53,33 @@ class Stack {
         }
 
         /**
-         * Забирает элемент из вершины стека
+         * Удаляет текущий элемемент
          */
-        int pop() {
-            if (top == NULL) {
-                throw "Stack is empty! (╯°□°）╯︵ ┻━┻";
+        void drop() {
+            if (!isEmpty()) {
+                Node *top_old = top;
+                top = top->next;
+                delete top_old;
             }
-
-            Node *top_old = top;
-            int data = top->data;
-            top = top->next;
-            delete top_old;
-            return data;
         }
 
         /**
          * Считывает элемент без его удаления
          */
         int pick() {
-            if (top == NULL) {
+            if (isEmpty()) {
                 throw "Stack is empty! (╯°□°）╯︵ ┻━┻";
             }
             return top->data;
+        }
+
+        /**
+         * Забирает элемент из вершины стека
+         */
+        int pop() {
+            int data = pick();
+            drop();
+            return data;
         }
 };
 
@@ -89,12 +101,8 @@ class StackedQueue : public Stack {
         void push(int a) {
             // Переносим основной стек в обратный
             // (с обратным порядком элементов)
-            while (true) {
-                try {
-                    backward.push(pop());
-                } catch (const char *ex) {
-                    break;
-                }
+            while (!isEmpty()) {
+                backward.push(pop());
             }
 
             // Обращаемся к методу push() родительского
@@ -102,12 +110,8 @@ class StackedQueue : public Stack {
             Stack::push(a); // добавляем новый элемент
 
             // Возвращаем все элементы из обратного стека в основной
-            while (true) {
-                try {
-                    Stack::push(backward.pop());
-                } catch (const char *ex) {
-                    break;
-                }
+            while (!backward.isEmpty()) {
+                Stack::push(backward.pop());
             }
         }
 };
@@ -121,7 +125,6 @@ int main(int argc, char **argv) {
         std::cout << "0. exit" << std::endl;
         std::cout << "1. push" << std::endl;
         std::cout << "2. pop" << std::endl;
-        std::cout << "3. pick" << std::endl;
         std::cout << "Please choose the next action: ";
 
         std::cin >> answer;
@@ -143,15 +146,6 @@ int main(int argc, char **argv) {
                 }
                 break;
 
-            case 3:
-                try {
-                    std::cout << std::endl << "Picked: "
-                              << queue->pick() << std::endl;
-                } catch (const char *ex) {
-                    std::cout << std::endl << ex << std::endl;
-                }
-                break;
-
             default:
                 running = false;
                 break;
@@ -164,7 +158,7 @@ int main(int argc, char **argv) {
          * (system("PAUSE") всё-равно не работает без cin.ignore())
          */
         std::string tmp;
-        std::cin.ignore(); // чистим буффер ввода
+        std::cin.ignore(); // чистим буфер ввода
         getline(std::cin, tmp); // ждём
     }
 
