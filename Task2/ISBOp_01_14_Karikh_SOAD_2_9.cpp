@@ -265,7 +265,7 @@ int main(int argc, char **argv) {
     std::string cmd;
     int arg;
     
-    for (int i = 1; i < 16; i++) {
+    for (int i = 1; i < 7; i++) {
         tree->add(i);
     }
     
