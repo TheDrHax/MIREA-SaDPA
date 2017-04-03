@@ -26,6 +26,28 @@ class Tree {
                 }
             }
         }
+        
+        /**
+         * Возвращает указатель на максимальный элемент.
+         */
+        Tree* max() {
+            Tree* tmp = this;
+            while (tmp->right != NULL) {
+                tmp = tmp->right;
+            }
+            return tmp;
+        }
+        
+        /**
+         * Возвращает указатель на минимальный элемент.
+         */
+        Tree* min() {
+            Tree* tmp = this;
+            while (tmp->left != NULL) {
+                tmp = tmp->left;
+            }
+            return tmp;
+        }
 
     public:
         Tree(int key) {
@@ -142,12 +164,7 @@ class Tree {
                     // Ищем элемент, не имеющий левых потомков, в
                     // правом поддереве и заменяем удаляеммый элемент
                     // на него.
-                    Tree* tmp_left = tmp->right->left;
-
-                    while (tmp_left->left != NULL) {
-                        tmp_left = tmp_left->left;
-                    }
-
+                    Tree* tmp_left = tmp->right->left->min();
                     tmp->key = tmp_left->key;
                     tmp->right->remove(tmp_left->key);
                 }
@@ -162,23 +179,21 @@ class Tree {
             
             // Заменяем корневой элемент максимальным
             if (this->right != NULL) {
-                tmp = this;
-                while (tmp->right != NULL) {
-                    tmp = tmp->right;
-                }
+                tmp = max();
+                
+                // Ключи нельзя присвоить сразу, т.к. они не должны
+                // дублироваться в пределах дерева.
                 int key = this->key;
-                this->key = tmp->key;
-                tmp->parent->right = NULL;
-                delete tmp;
+                int tmp_key = tmp->key;
+                
+                remove(tmp_key);
+                this->key = tmp_key;
                 this->add(key);
             }
             
             // Перемещаем правую часть налево
             if (this->right != NULL) {
-                tmp = this->left;
-                while (tmp->right != NULL) {
-                    tmp = tmp->right;
-                }
+                tmp = this->left->max();
                 tmp->right = this->right;
                 this->right = NULL;
                 tmp->right->parent = tmp;
@@ -209,6 +224,37 @@ class Tree {
                 }
             }
         }
+
+        
+        void balance() {
+            Tree* tmp = this;
+
+            // TODO: Код ниже надо повторять несколько раз для полной балансировки.
+            // Скорее всего, нужно будет считать разность высот разных веток.
+
+            while (tmp != NULL && tmp->left != NULL) {
+                Tree* p = tmp->left;
+                
+                tmp->left = tmp->left->left;
+                if (tmp->left != NULL) {
+                    tmp->left->parent = tmp;
+                }
+                
+                p->left = p->right;
+                p->right = tmp->right;
+                if (p->right != NULL) {
+                    p->right->parent = p;
+                }
+                tmp->right = p;
+                p->parent = tmp;
+                
+                int key = p->key;
+                p->key = tmp->key;
+                tmp->key = key;
+                
+                tmp = tmp->left;
+            }
+        }
 };
 
 int main(int argc, char **argv) {
@@ -219,7 +265,11 @@ int main(int argc, char **argv) {
     std::string cmd;
     int arg;
     
-    std::cout << "add <key>, remove <key>, vine, exit" << std::endl;
+    for (int i = 1; i < 16; i++) {
+        tree->add(i);
+    }
+    
+    std::cout << "add <key>, remove <key>, vine, balance, exit" << std::endl;
     while (true) {
         tree->print();
         scanf("%s", cmd_raw);
@@ -233,6 +283,8 @@ int main(int argc, char **argv) {
             tree->remove(arg);
         } else if (!cmd.compare("vine")) {
             tree->vine();
+        } else if (!cmd.compare("balance")) {
+            tree->balance();
         } else if (!cmd.compare("exit")) {
             break;
         }
