@@ -128,6 +128,7 @@ class Tree {
                     // Не затрагивая левую ветвь заменяем текущий
                     // элемент на правый дочерний. У правого дочернего
                     // нет левой ветви, так что мы ничего не теряем.
+
                     Tree* tmp_right = tmp->right;
                     
                     tmp->key = tmp->right->key;
@@ -152,6 +153,62 @@ class Tree {
                 }
             }
         }
+
+        /**
+         * Преобразует дерево в лозу с заменой корневого элемента
+         */
+        void vine() {
+            Tree* tmp = NULL;
+            
+            // Заменяем корневой элемент максимальным
+            if (this->right != NULL) {
+                tmp = this;
+                while (tmp->right != NULL) {
+                    tmp = tmp->right;
+                }
+                int key = this->key;
+                this->key = tmp->key;
+                tmp->parent->right = NULL;
+                delete tmp;
+                this->add(key);
+            }
+            
+            // Перемещаем правую часть налево
+            if (this->right != NULL) {
+                tmp = this->left;
+                while (tmp->right != NULL) {
+                    tmp = tmp->right;
+                }
+                tmp->right = this->right;
+                this->right = NULL;
+                tmp->right->parent = tmp;
+            }
+
+            // Причёсываем дерево (превращаем его в лозу)
+            tmp = this->left;
+            while (tmp != NULL) {
+                if (tmp->right != NULL) {
+                    Tree* p = tmp;
+                    
+                    tmp->parent->left = tmp->right;
+                    tmp = tmp->right;
+                    tmp->parent = p->parent;
+                    
+                    p->right = tmp->left;
+                    if (p->right != NULL) {
+                        p->right->parent = p;
+                    }
+
+                    tmp->left = p;
+                    if (tmp->left != NULL) {
+                        tmp->left->parent = tmp;
+                    }
+                }
+                if (tmp->right == NULL) {
+                    tmp = tmp->left;
+                }
+            }
+        }
 };
 
 int main(int argc, char **argv) {
@@ -162,19 +219,20 @@ int main(int argc, char **argv) {
     std::string cmd;
     int arg;
     
-    std::cout << "add <key>, remove <key>, exit" << std::endl;
+    std::cout << "add <key>, remove <key>, vine, exit" << std::endl;
     while (true) {
+        tree->print();
         scanf("%s", cmd_raw);
         cmd = cmd_raw;
         
         if (!cmd.compare("add")) {
             scanf("%d", &arg);
             tree->add(arg);
-            tree->print();
         } else if (!cmd.compare("remove")) {
             scanf("%d", &arg);
             tree->remove(arg);
-            tree->print();
+        } else if (!cmd.compare("vine")) {
+            tree->vine();
         } else if (!cmd.compare("exit")) {
             break;
         }
