@@ -5,8 +5,7 @@
 class Tree {
     private:
         Tree* parent = NULL;
-        Tree* left;
-        Tree* right;
+        Tree* children[2] = {NULL,NULL};
         int key;
 
         /**
@@ -18,10 +17,10 @@ class Tree {
             Tree* tmp = this;
 
             while (true) {
-                if (key < tmp->key && tmp->left != NULL) {
-                    tmp = tmp->left;
-                } else if (key > tmp->key && tmp->right != NULL) {
-                    tmp = tmp->right;
+                if (key < tmp->key && tmp->children[0] != NULL) {
+                    tmp = tmp->children[0];
+                } else if (key > tmp->key && tmp->children[1] != NULL) {
+                    tmp = tmp->children[1];
                 } else {
                     return tmp;
                 }
@@ -33,8 +32,8 @@ class Tree {
          */
         Tree* max() {
             Tree* tmp = this;
-            while (tmp->right != NULL) {
-                tmp = tmp->right;
+            while (tmp->children[1] != NULL) {
+                tmp = tmp->children[1];
             }
             return tmp;
         }
@@ -44,21 +43,19 @@ class Tree {
          */
         Tree* min() {
             Tree* tmp = this;
-            while (tmp->left != NULL) {
-                tmp = tmp->left;
+            while (tmp->children[0] != NULL) {
+                tmp = tmp->children[0];
             }
             return tmp;
         }
 
     public:
-        Tree(int key) {
-            this->key = key;
-        }
-
         Tree(int key, Tree* parent) {
             this->key = key;
             this->parent = parent;
         }
+        
+        Tree(int key) : Tree(key, NULL) {}
 
         /**
          * Выводит дерево в формате graphviz.
@@ -67,11 +64,11 @@ class Tree {
             if (parent == NULL)
                 std::cout << "digraph G {" << std::endl;
 
-            if (left != NULL) {
-                left->print();
+            if (children[0] != NULL) {
+                children[0]->print();
             }
-            if (right != NULL) {
-                right->print();
+            if (children[1] != NULL) {
+                children[1]->print();
             }
 
             if (parent != NULL)
@@ -84,8 +81,8 @@ class Tree {
         int size() {
             int size = 1;
             
-            if (left != NULL) size += left->size();
-            if (right != NULL) size += right->size();
+            if (children[0] != NULL) size += children[0]->size();
+            if (children[1] != NULL) size += children[1]->size();
 
             return size;
         }
@@ -97,9 +94,9 @@ class Tree {
             Tree* tmp = find(key);
 
             if (key < tmp->key) {
-                tmp->left = new Tree(key, tmp);
+                tmp->children[0] = new Tree(key, tmp);
             } else if (key > tmp->key) {
-                tmp->right = new Tree(key, tmp);
+                tmp->children[1] = new Tree(key, tmp);
             }
             
             balance();
@@ -118,21 +115,21 @@ class Tree {
             
             // Удаление корневого элемента
             if (tmp->parent == NULL) {
-                if (tmp->left != NULL && tmp->right != NULL) {
-                    Tree* min = tmp->right->min();
-                    min->left = tmp->left;
-                    min->left->parent = min;
-                } else if (tmp->right == NULL) {
-                    tmp->right = tmp->left->right;
-                    tmp->key = tmp->left->key;
-                    tmp->left = tmp->left->left;
+                if (tmp->children[0] != NULL && tmp->children[1] != NULL) {
+                    Tree* min = tmp->children[1]->min();
+                    min->children[0] = tmp->children[0];
+                    min->children[0]->parent = min;
+                } else if (tmp->children[1] == NULL) {
+                    tmp->children[1] = tmp->children[0]->children[1];
+                    tmp->key = tmp->children[0]->key;
+                    tmp->children[0] = tmp->children[0]->children[0];
                     balance();
                     return;
                 }
                 
-                tmp->left = tmp->right->left;
-                tmp->key = tmp->right->key;
-                tmp->right = tmp->right->right;
+                tmp->children[0] = tmp->children[1]->children[0];
+                tmp->key = tmp->children[1]->key;
+                tmp->children[1] = tmp->children[1]->children[1];
                 balance();
                 return;
             }
@@ -140,10 +137,10 @@ class Tree {
             // Ищем указатель на текущий элемент у родителя для
             // быстрого доступа к нему без лишних условий.
             Tree** parent_ptr = NULL;
-            if (tmp->parent->left == tmp) {
-                parent_ptr = &tmp->parent->left;
-            } else if (tmp->parent->right == tmp) {
-                parent_ptr = &tmp->parent->right;
+            if (tmp->parent->children[0] == tmp) {
+                parent_ptr = &tmp->parent->children[0];
+            } else if (tmp->parent->children[1] == tmp) {
+                parent_ptr = &tmp->parent->children[1];
             } else {
                 printf("WTF: %s\n",
                        "parent doesn't know about this element");
@@ -152,7 +149,7 @@ class Tree {
 
             // Если у элемента нет потомков, то просто удаляем его.
             // Также не забываем очистить указатель у родителя.
-            if (tmp->left == NULL && tmp->right == NULL) {
+            if (tmp->children[0] == NULL && tmp->children[1] == NULL) {
                 (*parent_ptr) = NULL;
                 delete tmp;
                 balance();
@@ -162,33 +159,33 @@ class Tree {
             // Если есть один дочерний элемент, то заменяем
             // удаляемый дочерним. Не забываем заменить родителя у
             // дочернего элемента.
-            if (tmp->left == NULL && tmp->right != NULL) { // правый
-                (*parent_ptr) = tmp->right;
-                tmp->right->parent = tmp->parent;
+            if (tmp->children[0] == NULL && tmp->children[1] != NULL) { // правый
+                (*parent_ptr) = tmp->children[1];
+                tmp->children[1]->parent = tmp->parent;
                 delete tmp;
                 balance();
                 return;
-            } else if (tmp->left != NULL && tmp->right == NULL) { // левый
-                (*parent_ptr) = tmp->left;
-                tmp->left->parent = tmp->parent;
+            } else if (tmp->children[0] != NULL && tmp->children[1] == NULL) { // левый
+                (*parent_ptr) = tmp->children[0];
+                tmp->children[0]->parent = tmp->parent;
                 delete tmp;
                 balance();
                 return;
             }
 
             // Проблема: у удаляемого элемента есть два дочерних.
-            if (tmp->left != NULL && tmp->right != NULL) {
-                if (tmp->right->left == NULL) {
+            if (tmp->children[0] != NULL && tmp->children[1] != NULL) {
+                if (tmp->children[1]->children[0] == NULL) {
                     // Не затрагивая левую ветвь заменяем текущий
                     // элемент на правый дочерний. У правого дочернего
                     // нет левой ветви, так что мы ничего не теряем.
 
-                    Tree* tmp_right = tmp->right;
+                    Tree* tmp_right = tmp->children[1];
                     
-                    tmp->key = tmp->right->key;
-                    tmp->right = tmp->right->right;
-                    if (tmp->right != NULL) {
-                        tmp->right->parent = tmp;
+                    tmp->key = tmp->children[1]->key;
+                    tmp->children[1] = tmp->children[1]->children[1];
+                    if (tmp->children[1] != NULL) {
+                        tmp->children[1]->parent = tmp;
                     }
                     
                     delete tmp_right;
@@ -196,9 +193,9 @@ class Tree {
                     // Ищем элемент, не имеющий левых потомков, в
                     // правом поддереве и заменяем удаляеммый элемент
                     // на него.
-                    Tree* tmp_left = tmp->right->left->min();
+                    Tree* tmp_left = tmp->children[1]->children[0]->min();
                     tmp->key = tmp_left->key;
-                    tmp->right->remove(tmp_left->key);
+                    tmp->children[1]->remove(tmp_left->key);
                 }
             }
             
@@ -212,32 +209,32 @@ class Tree {
             Tree* tmp = NULL;
             
             // Заменяем корневой элемент максимальным
-            while (this->right != NULL) {
+            while (this->children[1] != NULL) {
                 rotate_right(this->key);
             }
 
             // Причёсываем дерево (превращаем его в лозу)
-            tmp = this->left;
+            tmp = this->children[0];
             while (tmp != NULL) {
-                if (tmp->right != NULL) {
+                if (tmp->children[1] != NULL) {
                     Tree* p = tmp;
                     
-                    tmp->parent->left = tmp->right;
-                    tmp = tmp->right;
+                    tmp->parent->children[0] = tmp->children[1];
+                    tmp = tmp->children[1];
                     tmp->parent = p->parent;
                     
-                    p->right = tmp->left;
-                    if (p->right != NULL) {
-                        p->right->parent = p;
+                    p->children[1] = tmp->children[0];
+                    if (p->children[1] != NULL) {
+                        p->children[1]->parent = p;
                     }
 
-                    tmp->left = p;
-                    if (tmp->left != NULL) {
-                        tmp->left->parent = tmp;
+                    tmp->children[0] = p;
+                    if (tmp->children[0] != NULL) {
+                        tmp->children[0]->parent = tmp;
                     }
                 }
-                if (tmp->right == NULL) {
-                    tmp = tmp->left;
+                if (tmp->children[1] == NULL) {
+                    tmp = tmp->children[0];
                 }
             }
         }
@@ -247,22 +244,22 @@ class Tree {
             if (tmp->key != key) {
                 return;
             }
-            Tree* p = tmp->left;
+            Tree* p = tmp->children[0];
             
-            if (tmp->left == NULL) {
+            if (tmp->children[0] == NULL) {
                 return;
             }
-            tmp->left = tmp->left->left;
-            if (tmp->left != NULL) {
-                tmp->left->parent = tmp;
+            tmp->children[0] = tmp->children[0]->children[0];
+            if (tmp->children[0] != NULL) {
+                tmp->children[0]->parent = tmp;
             }
             
-            p->left = p->right;
-            p->right = tmp->right;
-            if (p->right != NULL) {
-                p->right->parent = p;
+            p->children[0] = p->children[1];
+            p->children[1] = tmp->children[1];
+            if (p->children[1] != NULL) {
+                p->children[1]->parent = p;
             }
-            tmp->right = p;
+            tmp->children[1] = p;
             p->parent = tmp;
             
             int key_tmp = p->key;
@@ -275,22 +272,22 @@ class Tree {
             if (tmp->key != key) {
                 return;
             }
-            Tree* p = tmp->right;
+            Tree* p = tmp->children[1];
             
-            if (tmp->right == NULL) {
+            if (tmp->children[1] == NULL) {
                 return;
             }
-            tmp->right = tmp->right->right;
-            if (tmp->right != NULL) {
-                tmp->right->parent = tmp;
+            tmp->children[1] = tmp->children[1]->children[1];
+            if (tmp->children[1] != NULL) {
+                tmp->children[1]->parent = tmp;
             }
             
-            p->right = p->left;
-            p->left = tmp->left;
-            if (p->left != NULL) {
-                p->left->parent = p;
+            p->children[1] = p->children[0];
+            p->children[0] = tmp->children[0];
+            if (p->children[0] != NULL) {
+                p->children[0]->parent = p;
             }
-            tmp->left = p;
+            tmp->children[0] = p;
             p->parent = tmp;
             
             int key_tmp = p->key;
@@ -308,8 +305,8 @@ class Tree {
             Tree* tmp = this;
 
             int n = 1;
-            while (tmp->left != NULL) {
-                tmp = tmp->left;
+            while (tmp->children[0] != NULL) {
+                tmp = tmp->children[0];
                 n++;
             }
             n = log2(n + 1);
@@ -317,10 +314,10 @@ class Tree {
             for (int i = 1; i < n; i++) {
                 tmp = this;
                 for (int j = 0; j < pow(2, n-i) - 1; j++) {
-                    if (tmp->left != NULL) {
+                    if (tmp->children[0] != NULL) {
                         rotate_left(tmp->key);
                     }
-                    tmp = tmp->left;
+                    tmp = tmp->children[0];
                 }
             }
         }
