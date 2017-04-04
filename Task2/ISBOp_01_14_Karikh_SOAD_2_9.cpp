@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <math.h>
 #include <iostream>
 
 class Tree {
@@ -79,6 +80,15 @@ class Tree {
             if (parent == NULL)
                 std::cout << "}" << std::endl;
         }
+        
+        int size() {
+            int size = 1;
+            
+            if (left != NULL) size += left->size();
+            if (right != NULL) size += right->size();
+
+            return size;
+        }
 
         /**
          * Добавляет новый элемент в дерево, если он ещё не существует.
@@ -90,9 +100,9 @@ class Tree {
                 tmp->left = new Tree(key, tmp);
             } else if (key > tmp->key) {
                 tmp->right = new Tree(key, tmp);
-            } else {
-                tmp->key = key;
             }
+            
+            balance();
         }
 
         /**
@@ -126,6 +136,7 @@ class Tree {
             if (tmp->left == NULL && tmp->right == NULL) {
                 (*parent_ptr) = NULL;
                 delete tmp;
+                balance();
                 return;
             }
 
@@ -136,11 +147,13 @@ class Tree {
                 (*parent_ptr) = tmp->right;
                 tmp->right->parent = tmp->parent;
                 delete tmp;
+                balance();
                 return;
             } else if (tmp->left != NULL && tmp->right == NULL) { // левый
                 (*parent_ptr) = tmp->left;
                 tmp->left->parent = tmp->parent;
                 delete tmp;
+                balance();
                 return;
             }
 
@@ -169,6 +182,8 @@ class Tree {
                     tmp->right->remove(tmp_left->key);
                 }
             }
+            
+            balance();
         }
 
         /**
@@ -178,25 +193,8 @@ class Tree {
             Tree* tmp = NULL;
             
             // Заменяем корневой элемент максимальным
-            if (this->right != NULL) {
-                tmp = max();
-                
-                // Ключи нельзя присвоить сразу, т.к. они не должны
-                // дублироваться в пределах дерева.
-                int key = this->key;
-                int tmp_key = tmp->key;
-                
-                remove(tmp_key);
-                this->key = tmp_key;
-                this->add(key);
-            }
-            
-            // Перемещаем правую часть налево
-            if (this->right != NULL) {
-                tmp = this->left->max();
-                tmp->right = this->right;
-                this->right = NULL;
-                tmp->right->parent = tmp;
+            while (this->right != NULL) {
+                rotate_right(this->key);
             }
 
             // Причёсываем дерево (превращаем его в лозу)
@@ -253,15 +251,58 @@ class Tree {
             tmp->key = key_tmp;
         }
         
+        void rotate_right(int key) {
+            Tree* tmp = find(key);
+            if (tmp->key != key) {
+                return;
+            }
+            Tree* p = tmp->right;
+            
+            if (tmp->right == NULL) {
+                return;
+            }
+            tmp->right = tmp->right->right;
+            if (tmp->right != NULL) {
+                tmp->right->parent = tmp;
+            }
+            
+            p->right = p->left;
+            p->left = tmp->left;
+            if (p->left != NULL) {
+                p->left->parent = p;
+            }
+            tmp->left = p;
+            p->parent = tmp;
+            
+            int key_tmp = p->key;
+            p->key = tmp->key;
+            tmp->key = key_tmp;
+        }
+        
         void balance() {
+            float log = log2(size() + 1);
+            if (floor(log) != log) {
+                return;
+            }
+            
+            vine();
             Tree* tmp = this;
 
-            // TODO: Код ниже надо повторять несколько раз для полной балансировки.
-            // Скорее всего, нужно будет считать разность высот разных веток.
-
-            while (tmp != NULL && tmp->left != NULL) {
-                rotate_left(tmp->key);
+            int n = 1;
+            while (tmp->left != NULL) {
                 tmp = tmp->left;
+                n++;
+            }
+            n = log2(n + 1);
+
+            for (int i = 1; i < n; i++) {
+                tmp = this;
+                for (int j = 0; j < pow(2, n-i) - 1; j++) {
+                    if (tmp->left != NULL) {
+                        rotate_left(tmp->key);
+                    }
+                    tmp = tmp->left;
+                }
             }
         }
 };
@@ -278,7 +319,7 @@ int main(int argc, char **argv) {
         tree->add(i);
     }
     
-    std::cout << "add <key>, remove <key>, rotate, vine, balance, exit" << std::endl;
+    std::cout << "add <key>, remove <key>, size, rotate_left/right, vine, balance, exit" << std::endl;
     while (true) {
         tree->print();
         scanf("%s", cmd_raw);
@@ -290,9 +331,14 @@ int main(int argc, char **argv) {
         } else if (!cmd.compare("remove")) {
             scanf("%d", &arg);
             tree->remove(arg);
+        } else if (!cmd.compare("size")) {
+            printf("%d\n", tree->size());
         } else if (!cmd.compare("rotate_left")) {
             scanf("%d", &arg);
             tree->rotate_left(arg);
+        } else if (!cmd.compare("rotate_right")) {
+            scanf("%d", &arg);
+            tree->rotate_right(arg);
         } else if (!cmd.compare("vine")) {
             tree->vine();
         } else if (!cmd.compare("balance")) {
