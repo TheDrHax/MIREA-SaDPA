@@ -225,6 +225,33 @@ class Tree {
             }
         }
 
+        void rotate_left(int key) {
+            Tree* tmp = find(key);
+            if (tmp->key != key) {
+                return;
+            }
+            Tree* p = tmp->left;
+            
+            if (tmp->left == NULL) {
+                return;
+            }
+            tmp->left = tmp->left->left;
+            if (tmp->left != NULL) {
+                tmp->left->parent = tmp;
+            }
+            
+            p->left = p->right;
+            p->right = tmp->right;
+            if (p->right != NULL) {
+                p->right->parent = p;
+            }
+            tmp->right = p;
+            p->parent = tmp;
+            
+            int key_tmp = p->key;
+            p->key = tmp->key;
+            tmp->key = key_tmp;
+        }
         
         void balance() {
             Tree* tmp = this;
@@ -233,25 +260,7 @@ class Tree {
             // Скорее всего, нужно будет считать разность высот разных веток.
 
             while (tmp != NULL && tmp->left != NULL) {
-                Tree* p = tmp->left;
-                
-                tmp->left = tmp->left->left;
-                if (tmp->left != NULL) {
-                    tmp->left->parent = tmp;
-                }
-                
-                p->left = p->right;
-                p->right = tmp->right;
-                if (p->right != NULL) {
-                    p->right->parent = p;
-                }
-                tmp->right = p;
-                p->parent = tmp;
-                
-                int key = p->key;
-                p->key = tmp->key;
-                tmp->key = key;
-                
+                rotate_left(tmp->key);
                 tmp = tmp->left;
             }
         }
@@ -269,7 +278,7 @@ int main(int argc, char **argv) {
         tree->add(i);
     }
     
-    std::cout << "add <key>, remove <key>, vine, balance, exit" << std::endl;
+    std::cout << "add <key>, remove <key>, rotate, vine, balance, exit" << std::endl;
     while (true) {
         tree->print();
         scanf("%s", cmd_raw);
@@ -281,6 +290,9 @@ int main(int argc, char **argv) {
         } else if (!cmd.compare("remove")) {
             scanf("%d", &arg);
             tree->remove(arg);
+        } else if (!cmd.compare("rotate_left")) {
+            scanf("%d", &arg);
+            tree->rotate_left(arg);
         } else if (!cmd.compare("vine")) {
             tree->vine();
         } else if (!cmd.compare("balance")) {
