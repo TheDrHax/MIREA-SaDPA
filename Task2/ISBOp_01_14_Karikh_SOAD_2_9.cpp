@@ -111,10 +111,29 @@ class Tree {
         void remove(int key) {
             Tree* tmp = find(key);
             
-            // Удалять корневой элемент нельзя, так как дерево
-            // потеряется в памяти. Также мы не можем удалить
-            // элемент, если его нет.
-            if (tmp->parent == NULL || tmp->key != key) {
+            // Мы не можем удалить элемент, если его нет.
+            if (tmp->key != key) {
+                return;
+            }
+            
+            // Удаление корневого элемента
+            if (tmp->parent == NULL) {
+                if (tmp->left != NULL && tmp->right != NULL) {
+                    Tree* min = tmp->right->min();
+                    min->left = tmp->left;
+                    min->left->parent = min;
+                } else if (tmp->right == NULL) {
+                    tmp->right = tmp->left->right;
+                    tmp->key = tmp->left->key;
+                    tmp->left = tmp->left->left;
+                    balance();
+                    return;
+                }
+                
+                tmp->left = tmp->right->left;
+                tmp->key = tmp->right->key;
+                tmp->right = tmp->right->right;
+                balance();
                 return;
             }
 
@@ -319,7 +338,8 @@ int main(int argc, char **argv) {
         tree->add(i);
     }
     
-    std::cout << "add <key>, remove <key>, size, rotate_left/right, vine, balance, exit" << std::endl;
+    printf("add <key>, remove <key>, size, rotate_left <key>,\n");
+    printf("rotate_right <key>, vine, balance, exit\n");
     while (true) {
         tree->print();
         scanf("%s", cmd_raw);
