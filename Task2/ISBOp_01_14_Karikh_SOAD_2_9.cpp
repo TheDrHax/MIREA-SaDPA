@@ -191,7 +191,7 @@ class Tree {
             
             // Заменяем корневой элемент максимальным
             while (this->children[1] != NULL) {
-                rotate_right(this->key);
+                rotate(this->key, false);
             }
 
             // Причёсываем дерево (превращаем его в лозу)
@@ -219,56 +219,41 @@ class Tree {
                 }
             }
         }
-
-        void rotate_left(int key) {
-            Tree* tmp = find(key);
-            if (tmp->key != key) {
-                return;
-            }
-            Tree* p = tmp->children[0];
-            
-            if (tmp->children[0] == NULL) {
-                return;
-            }
-            tmp->children[0] = tmp->children[0]->children[0];
-            if (tmp->children[0] != NULL) {
-                tmp->children[0]->parent = tmp;
-            }
-            
-            p->children[0] = p->children[1];
-            p->children[1] = tmp->children[1];
-            if (p->children[1] != NULL) {
-                p->children[1]->parent = p;
-            }
-            tmp->children[1] = p;
-            p->parent = tmp;
-            
-            int key_tmp = p->key;
-            p->key = tmp->key;
-            tmp->key = key_tmp;
-        }
         
-        void rotate_right(int key) {
+        /**
+         * Вращает элементы отнсительно выбранного ключа.
+         * Направление указывается значением boolean:
+         *  против часовой стрелки: true 
+         *  по часовой стрелке: false
+         */
+        void rotate(int key, bool left) {
             Tree* tmp = find(key);
             if (tmp->key != key) {
                 return;
             }
-            Tree* p = tmp->children[1];
             
-            if (tmp->children[1] == NULL) {
+            int a,b;
+            if (left) {
+                a = 0; b = 1;
+            } else {
+                a = 1; b = 0;
+            }
+            
+            Tree* p = tmp->children[a];
+            if (tmp->children[a] == NULL) {
                 return;
             }
-            tmp->children[1] = tmp->children[1]->children[1];
-            if (tmp->children[1] != NULL) {
-                tmp->children[1]->parent = tmp;
+            tmp->children[a] = tmp->children[a]->children[a];
+            if (tmp->children[a] != NULL) {
+                tmp->children[a]->parent = tmp;
             }
             
-            p->children[1] = p->children[0];
-            p->children[0] = tmp->children[0];
-            if (p->children[0] != NULL) {
-                p->children[0]->parent = p;
+            p->children[a] = p->children[b];
+            p->children[b] = tmp->children[b];
+            if (p->children[b] != NULL) {
+                p->children[b]->parent = p;
             }
-            tmp->children[0] = p;
+            tmp->children[b] = p;
             p->parent = tmp;
             
             int key_tmp = p->key;
@@ -296,7 +281,7 @@ class Tree {
                 tmp = this;
                 for (int j = 0; j < pow(2, n-i) - 1; j++) {
                     if (tmp->children[0] != NULL) {
-                        rotate_left(tmp->key);
+                        rotate(tmp->key, true);
                     }
                     tmp = tmp->children[0];
                 }
@@ -331,12 +316,11 @@ int main(int argc, char **argv) {
             tree->remove(arg);
         } else if (!cmd.compare("size")) {
             printf("%d\n", tree->size());
-        } else if (!cmd.compare("rotate_left")) {
+        } else if (!cmd.compare("rotate")) {
+            scanf("%s", cmd_raw);
+            cmd = cmd_raw;
             scanf("%d", &arg);
-            tree->rotate_left(arg);
-        } else if (!cmd.compare("rotate_right")) {
-            scanf("%d", &arg);
-            tree->rotate_right(arg);
+            tree->rotate(arg, !cmd.compare("left"));
         } else if (!cmd.compare("vine")) {
             tree->vine();
         } else if (!cmd.compare("balance")) {
