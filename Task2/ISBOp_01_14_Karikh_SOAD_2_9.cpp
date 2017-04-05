@@ -312,8 +312,9 @@ int main(int argc, char **argv) {
     std::string cmd;
     int arg;
     
-    for (int i = 1; i < 7; i++) {
-        tree->add(i);
+    srand(time(NULL));
+    while (tree->size() < 63) {
+        tree->add(rand() % 100);
     }
     
     std::cout << "add <key>, remove <key>, size, rotate_left/right, vine, balance, exit" << std::endl;
