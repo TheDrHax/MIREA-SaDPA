@@ -1,3 +1,13 @@
+/**
+ * ISBOp_01_14_Karikh_SOAD_2_9.cpp
+ *
+ * Практическое задание 2 (https://vk.com/doc-76267187_443134832)
+ * Вариант: двоичное дерево с принудительной балансировкой
+ *
+ * Карих Дмитрий, ИСБОп-01-14
+ * https://github.com/TheDrHax/MIREA-SaDPA
+ */
+
 #include <stdio.h>
 #include <math.h>
 #include <iostream>
@@ -286,24 +296,18 @@ class Tree {
         }
         
         void balance() {
-            float log = log2(size() + 1);
-            if (floor(log) != log) {
+            // Если количество элементов не равно 2^n-1, то выходим
+            float size_log = log2(size() + 1);
+            if (floor(size_log) != size_log) {
                 return;
             }
             
-            vine();
-            Tree* tmp = this;
+            vine(); // необходимо для балансировки
 
-            int n = 1;
-            while (tmp->children[0] != NULL) {
-                tmp = tmp->children[0];
-                n++;
-            }
-            n = log2(n + 1);
-
-            for (int i = 1; i < n; i++) {
+            Tree* tmp = NULL;
+            for (int i = 1; i < size_log; i++) {
                 tmp = this;
-                for (int j = 0; j < pow(2, n-i) - 1; j++) {
+                for (int j = 0; j < pow(2, size_log-i) - 1; j++) {
                     if (tmp->children[0] != NULL) {
                         rotate(tmp->key, true);
                     }
@@ -322,7 +326,7 @@ int main(int argc, char **argv) {
     int arg;
     
     srand(time(NULL));
-    while (tree->size() < 63) {
+    while (tree->size() < 7) {
         tree->add(rand() % 100);
     }
     
