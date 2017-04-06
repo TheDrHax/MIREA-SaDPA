@@ -192,43 +192,6 @@ class Tree {
             
             balance();
         }
-
-        /**
-         * Преобразует дерево в лозу с заменой корневого элемента
-         */
-        void vine() {
-            Tree* tmp = NULL;
-            
-            // Заменяем корневой элемент максимальным
-            while (this->children[1] != NULL) {
-                rotate(this->key, false);
-            }
-
-            // Причёсываем дерево (превращаем его в лозу)
-            tmp = this->children[0];
-            while (tmp != NULL) {
-                if (tmp->children[1] != NULL) {
-                    Tree* p = tmp;
-                    
-                    tmp->parent->children[0] = tmp->children[1];
-                    tmp = tmp->children[1];
-                    tmp->parent = p->parent;
-                    
-                    p->children[1] = tmp->children[0];
-                    if (p->children[1] != NULL) {
-                        p->children[1]->parent = p;
-                    }
-
-                    tmp->children[0] = p;
-                    if (tmp->children[0] != NULL) {
-                        tmp->children[0]->parent = tmp;
-                    }
-                }
-                if (tmp->children[1] == NULL) {
-                    tmp = tmp->children[0];
-                }
-            }
-        }
         
         /**
          * Вращает элементы отнсительно выбранного ключа.
@@ -295,6 +258,20 @@ class Tree {
             tmp->key = key_tmp;
         }
         
+        /**
+         * Преобразует дерево в лозу с заменой корневого элемента
+         */
+        void vine() {
+            Tree* tmp = this;
+
+            while (tmp != NULL) {
+                while (tmp->children[1] != NULL) {
+                    rotate(tmp->key, false);
+                }
+                tmp = tmp->children[0];
+            }
+        }
+
         void balance() {
             // Если количество элементов не равно 2^n-1, то выходим
             float size_log = log2(size() + 1);
