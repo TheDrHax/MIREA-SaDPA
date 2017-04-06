@@ -109,11 +109,13 @@ class Tree {
                 tmp->children[1] = new Tree(key, tmp);
             }
             
-            balance();
+            lazy_balance();
         }
 
         /**
          * Удаляет ключ из дерева.
+         * 
+         * TODO: Удаление корневого элемента невозможно
          */
         void remove(int key) {
             Tree* tmp = find(key);
@@ -143,7 +145,7 @@ class Tree {
             if (tmp->children[0] == NULL && tmp->children[1] == NULL) {
                 (*parent_ptr) = NULL;
                 delete tmp;
-                balance();
+                lazy_balance();
                 return;
             }
 
@@ -154,13 +156,13 @@ class Tree {
                 (*parent_ptr) = tmp->children[1];
                 tmp->children[1]->parent = tmp->parent;
                 delete tmp;
-                balance();
+                lazy_balance();
                 return;
             } else if (tmp->children[0] != NULL && tmp->children[1] == NULL) { // левый
                 (*parent_ptr) = tmp->children[0];
                 tmp->children[0]->parent = tmp->parent;
                 delete tmp;
-                balance();
+                lazy_balance();
                 return;
             }
 
@@ -190,7 +192,7 @@ class Tree {
                 }
             }
             
-            balance();
+            lazy_balance();
         }
         
         /**
@@ -248,12 +250,13 @@ class Tree {
             }
         }
 
+        /**
+         * Пытается сбалансировать дерево при любом количестве
+         * элементов (но при неправильном количестве обычно делает
+         * только хуже)
+         */
         void balance() {
-            // Если количество элементов не равно 2^n-1, то выходим
             float size_log = log2(size() + 1);
-            if (floor(size_log) != size_log) {
-                return;
-            }
             
             vine(); // необходимо для балансировки
 
@@ -261,11 +264,19 @@ class Tree {
             for (int i = 1; i < size_log; i++) {
                 tmp = this;
                 for (int j = 0; j < pow(2, size_log-i) - 1; j++) {
-                    if (tmp->children[0] != NULL) {
-                        rotate(tmp->key, true);
-                    }
+                    rotate(tmp->key, true);
                     tmp = tmp->children[0];
                 }
+            }
+        }
+        
+        /**
+         * Балансирует дерево, если у него есть 2^n-1 элементов
+         */
+        void lazy_balance() {
+            float size_log = log2(size() + 1);
+            if (floor(size_log) == size_log) {
+                balance();
             }
         }
 };
