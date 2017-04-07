@@ -67,6 +67,11 @@ class Tree {
         
         Tree(int key) : Tree(key, NULL) {}
 
+        ~Tree() {
+            delete children[0];
+            delete children[1];
+        }
+
         /**
          * Выводит дерево в формате graphviz.
          */
