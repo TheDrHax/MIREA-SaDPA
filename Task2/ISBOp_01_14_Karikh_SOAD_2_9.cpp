@@ -160,12 +160,14 @@ class Tree {
             if (tmp->children[0] == NULL && tmp->children[1] != NULL) { // правый
                 (*parent_ptr) = tmp->children[1];
                 tmp->children[1]->parent = tmp->parent;
+                tmp->children[1] = NULL;
                 delete tmp;
                 lazy_balance();
                 return;
             } else if (tmp->children[0] != NULL && tmp->children[1] == NULL) { // левый
                 (*parent_ptr) = tmp->children[0];
                 tmp->children[0]->parent = tmp->parent;
+                tmp->children[0] = NULL;
                 delete tmp;
                 lazy_balance();
                 return;
