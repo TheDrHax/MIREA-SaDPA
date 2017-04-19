@@ -12,6 +12,9 @@
 #include <math.h>
 #include <iostream>
 
+#define CHILD_ID(tmp) tmp->parent->key > tmp->key ? 0 : 1
+#define CHILD_PTR(tmp) tmp->parent->children[CHILD_ID(tmp)]
+
 class Tree {
     private:
         Tree* parent = NULL;
@@ -36,7 +39,7 @@ class Tree {
                 }
             }
         }
-        
+
         /**
          * Возвращает указатель на максимальный элемент.
          */
@@ -47,7 +50,7 @@ class Tree {
             }
             return tmp;
         }
-        
+
         /**
          * Возвращает указатель на минимальный элемент.
          */
@@ -59,12 +62,24 @@ class Tree {
             return tmp;
         }
 
+        /**
+         * Заменяет текущий элемент другим
+         */
+        void replace(Tree* ptr) {
+            key = ptr->key;
+            for (int i = 0; i <= 1; i++) {
+                children[i] = ptr->children[i];
+                ptr->children[i] = NULL;
+            }
+            delete ptr;
+        }
+
     public:
         Tree(int key, Tree* parent) {
             this->key = key;
             this->parent = parent;
         }
-        
+
         Tree(int key) : Tree(key, NULL) {}
 
         ~Tree() {
@@ -92,10 +107,10 @@ class Tree {
             if (parent == NULL)
                 std::cout << "}" << std::endl;
         }
-        
+
         int size() {
             int size = 1;
-            
+
             if (children[0] != NULL) size += children[0]->size();
             if (children[1] != NULL) size += children[1]->size();
 
@@ -107,101 +122,51 @@ class Tree {
          */
         void add(int key) {
             Tree* tmp = find(key);
-
-            if (key < tmp->key) {
-                tmp->children[0] = new Tree(key, tmp);
-            } else if (key > tmp->key) {
-                tmp->children[1] = new Tree(key, tmp);
+            if (tmp->key != key) {
+                Tree* new_tree = new Tree(key, tmp);
+                CHILD_PTR(new_tree) = new_tree;
             }
-            
             lazy_balance();
         }
 
         /**
          * Удаляет ключ из дерева.
-         * 
-         * TODO: Удаление корневого элемента невозможно
          */
         void remove(int key) {
             Tree* tmp = find(key);
 
-            // Удалять корневой элемент нельзя, так как дерево
-            // потеряется в памяти. Также мы не можем удалить
-            // элемент, если его нет.
-            if (tmp->parent == NULL || tmp->key != key) {
+            // Ключ не найден, выходим
+            if (tmp->key != key) {
                 return;
             }
 
-            // Ищем указатель на текущий элемент у родителя для
-            // быстрого доступа к нему без лишних условий.
-            Tree** parent_ptr = NULL;
-            if (tmp->parent->children[0] == tmp) {
-                parent_ptr = &tmp->parent->children[0];
-            } else if (tmp->parent->children[1] == tmp) {
-                parent_ptr = &tmp->parent->children[1];
-            } else {
-                printf("WTF: %s\n",
-                       "parent doesn't know about this element");
-                throw "WTF";
-            }
-
-            // Если у элемента нет потомков, то просто удаляем его.
-            // Также не забываем очистить указатель у родителя.
-            if (tmp->children[0] == NULL && tmp->children[1] == NULL) {
-                (*parent_ptr) = NULL;
+            // У элемента нет потомков
+            else if (tmp->children[0] == NULL && tmp->children[1] == NULL) {
+                CHILD_PTR(tmp) = NULL;
                 delete tmp;
-                lazy_balance();
-                return;
             }
 
-            // Если есть один дочерний элемент, то заменяем
-            // удаляемый дочерним. Не забываем заменить родителя у
-            // дочернего элемента.
-            if (tmp->children[0] == NULL && tmp->children[1] != NULL) { // правый
-                (*parent_ptr) = tmp->children[1];
-                tmp->children[1]->parent = tmp->parent;
-                tmp->children[1] = NULL;
-                delete tmp;
-                lazy_balance();
-                return;
-            } else if (tmp->children[0] != NULL && tmp->children[1] == NULL) { // левый
-                (*parent_ptr) = tmp->children[0];
-                tmp->children[0]->parent = tmp->parent;
-                tmp->children[0] = NULL;
-                delete tmp;
-                lazy_balance();
-                return;
+            // У элемента есть левый потомок
+            else if (tmp->children[0] != NULL && tmp->children[1] == NULL) {
+                tmp->replace(tmp->children[0]);
             }
 
-            // Проблема: у удаляемого элемента есть два дочерних.
-            if (tmp->children[0] != NULL && tmp->children[1] != NULL) {
-                if (tmp->children[1]->children[0] == NULL) {
-                    // Не затрагивая левую ветвь заменяем текущий
-                    // элемент на правый дочерний. У правого дочернего
-                    // нет левой ветви, так что мы ничего не теряем.
-
-                    Tree* tmp_right = tmp->children[1];
-                    
-                    tmp->key = tmp->children[1]->key;
-                    tmp->children[1] = tmp->children[1]->children[1];
-                    if (tmp->children[1] != NULL) {
-                        tmp->children[1]->parent = tmp;
-                    }
-                    
-                    delete tmp_right;
-                } else {
-                    // Ищем элемент, не имеющий левых потомков, в
-                    // правом поддереве и заменяем удаляеммый элемент
-                    // на него.
-                    Tree* tmp_left = tmp->children[1]->children[0]->min();
-                    tmp->key = tmp_left->key;
-                    tmp->children[1]->remove(tmp_left->key);
-                }
+            // У элемента есть правый потомок
+            else if (tmp->children[1] != NULL && tmp->children[0] == NULL) {
+                tmp->replace(tmp->children[1]);
             }
-            
+
+            // У элемента два потомка
+            else if (tmp->children[0] != NULL && tmp->children[1] != NULL) {
+                int tmp_key = tmp->children[1]->min()->key;
+                tmp->remove(tmp_key);
+                tmp->key = tmp_key;
+            }
+
             lazy_balance();
+            return;
         }
-        
+
         /**
          * Вращает элементы отнсительно выбранного ключа.
          * Направление указывается значением boolean:
@@ -213,14 +178,14 @@ class Tree {
             if (tmp->key != key) {
                 return;
             }
-            
+
             int a,b;
             if (left) {
                 a = 0; b = 1;
             } else {
                 a = 1; b = 0;
             }
-            
+
             Tree* p = tmp->children[a];
             if (p == NULL) {
                 return;
@@ -229,7 +194,7 @@ class Tree {
             if (tmp->children[a] != NULL) {
                 tmp->children[a]->parent = tmp;
             }
-            
+
             p->children[a] = p->children[b];
             p->children[b] = tmp->children[b];
             if (p->children[b] != NULL) {
@@ -237,12 +202,12 @@ class Tree {
             }
             tmp->children[b] = p;
             p->parent = tmp;
-            
+
             int key_tmp = p->key;
             p->key = tmp->key;
             tmp->key = key_tmp;
         }
-        
+
         /**
          * Преобразует дерево в лозу с заменой корневого элемента
          */
@@ -264,7 +229,7 @@ class Tree {
          */
         void balance() {
             float size_log = log2(size() + 1);
-            
+
             vine(); // необходимо для балансировки
 
             Tree* tmp = NULL;
@@ -276,7 +241,7 @@ class Tree {
                 }
             }
         }
-        
+
         /**
          * Балансирует дерево, если у него есть 2^n-1 элементов
          */
@@ -291,22 +256,22 @@ class Tree {
 int main(int argc, char **argv) {
     Tree* tree = new Tree(0);
     tree->print();
-    
+
     char cmd_raw[6];
     std::string cmd;
     int arg;
-    
+
     srand(time(NULL));
     while (tree->size() < 7) {
         tree->add(rand() % 100);
     }
-    
+
     std::cout << "add <key>, remove <key>, size, rotate_left/right, vine, balance, exit" << std::endl;
     while (true) {
         tree->print();
         scanf("%s", cmd_raw);
         cmd = cmd_raw;
-        
+
         if (!cmd.compare("add")) {
             scanf("%d", &arg);
             tree->add(arg);
