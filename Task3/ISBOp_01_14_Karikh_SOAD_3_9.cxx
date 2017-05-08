@@ -5,6 +5,8 @@
 #define WORD_COUNT 20
 #define LINE_MAX 20
 
+#define PRINT(text,count) for (int i = 0; i < count; i++) printf(text);
+
 /**
  * Возвращает вектор из N случайных чисел
  */
@@ -24,16 +26,12 @@ void print_vector(std::vector<int> words, long int state) {
     
     // Проходим по всем словам
     for (int word = 0; word < WORD_COUNT; word++) {
-        for (int i = 0; i < words[word]; i++) {
-            printf("A");
-            current_line_size++;
-        }
+        PRINT("A", words[word]);
+        current_line_size += words[word];
         
         if ((state >> word) & 1) { // Требуется перенос?
             // Добиваем текущую строку и ставим ограничитель
-            for (int i = current_line_size; i <= LINE_MAX - 1; i++) {
-                printf(" ");
-            }
+            PRINT(" ", LINE_MAX - current_line_size);
             current_line_size = 0;
             printf("|\n");
         } else {
