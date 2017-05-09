@@ -68,8 +68,8 @@ void print_vector(std::vector<int> words, long int breaks) {
         if ((breaks >> word) & 1 || word == WORD_COUNT - 1) {
             // Добиваем текущую строку и ставим ограничитель
             PRINT(" ", LINE_MAX - current_line_size);
+            printf("| %d\n", LINE_MAX - current_line_size);
             current_line_size = 0;
-            printf("|\n");
         } else {
             printf(" ");
             current_line_size++;
