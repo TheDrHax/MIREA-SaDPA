@@ -19,30 +19,6 @@ std::vector<int> generator(int N) {
 }
 
 /**
- * Выводит вектор в виде кричащего предложения с учётом переноса строк
- */
-void print_vector(std::vector<int> words, long int state) {
-    int current_line_size = 0;
-    
-    // Проходим по всем словам
-    for (int word = 0; word < WORD_COUNT; word++) {
-        PRINT("A", words[word]);
-        current_line_size += words[word];
-        
-        if ((state >> word) & 1) { // Требуется перенос?
-            // Добиваем текущую строку и ставим ограничитель
-            PRINT(" ", LINE_MAX - current_line_size);
-            current_line_size = 0;
-            printf("|\n");
-        } else {
-            printf(" ");
-            current_line_size++;
-        }
-    }
-    printf("\n");
-}
-
-/**
  * Возвращает сумму кубов остатков для выбранного состояния.
  * Для неудачных состояний (превышение размера строки) возвращает -1.
  */
@@ -71,6 +47,56 @@ int check_state(std::vector<int> words, long int state) {
     return sum;
 }
 
+/**
+ * Выводит вектор в виде кричащего предложения с учётом переноса строк
+ */
+void print_vector(std::vector<int> words, long int breaks) {
+    int current_line_size = 0;
+    
+    printf("%ld (%d)\n", breaks, check_state(words, breaks));
+    
+    // Проходим по всем словам
+    for (int word = 0; word < WORD_COUNT; word++) {
+        PRINT("A", words[word]);
+        current_line_size += words[word];
+        
+        if ((breaks >> word) & 1) { // Требуется перенос?
+            // Добиваем текущую строку и ставим ограничитель
+            PRINT(" ", LINE_MAX - current_line_size);
+            current_line_size = 0;
+            printf("|\n");
+        } else {
+            printf(" ");
+            current_line_size++;
+        }
+    }
+    printf("\n");
+}
+
+/**
+ * Максимально заполняет строки по порядку (не всегда эффективно)
+ */
+long int trivial(std::vector<int> words) {
+    long int solution = 0;
+    int current_line_size = 0;
+
+    for (int word = 0; word < WORD_COUNT; word++) {
+        if (LINE_MAX - current_line_size < words[word]) {
+            solution |= 1 << (word - 1);
+            current_line_size = 0;
+        }
+
+        // Пробел не играет роли в конце строки
+        current_line_size += words[word] + 1;
+    }
+    
+    return solution;
+}
+
+/**
+ * Перебирает все состояния в поисках наиболее удачной
+ * последовательности переносов
+ */
 long int brute_force(std::vector<int> words) {
     long int best_state = 0;
     int best_quality = -1;
@@ -96,12 +122,10 @@ int main(int argc, char **argv) {
 	srand(time(NULL));
 
     std::vector<int> words = generator(WORD_COUNT);
+
     print_vector(words, 0);
-    
-    long int breaks = brute_force(words);
-    printf("%ld (%d)\n", breaks, check_state(words, breaks));
-    print_vector(words, breaks);
-    
+    print_vector(words, trivial(words));
+    print_vector(words, brute_force(words));
     
 	return 0;
 }
