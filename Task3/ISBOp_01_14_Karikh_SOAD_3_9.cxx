@@ -65,7 +65,7 @@ void print_vector(std::vector<int> words, long int breaks) {
         PRINT("A", words[word]);
         current_line_size += words[word];
         
-        if ((breaks >> word) & 1) { // Требуется перенос?
+        if ((breaks >> word) & 1 || word == WORD_COUNT - 1) {
             // Добиваем текущую строку и ставим ограничитель
             PRINT(" ", LINE_MAX - current_line_size);
             current_line_size = 0;
@@ -75,10 +75,6 @@ void print_vector(std::vector<int> words, long int breaks) {
             current_line_size++;
         }
     }
-#ifdef LAST_LINE
-    PRINT(" ", LINE_MAX - current_line_size);
-    printf("|");
-#endif
     printf("\n");
 }
 
