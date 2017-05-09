@@ -2,7 +2,7 @@
 #include <vector>
 #include <math.h>
 
-#define WORD_COUNT 10
+#define WORD_COUNT 20
 #define LINE_MAX 20
 #define LAST_LINE
 
@@ -130,20 +130,11 @@ long int brute_force(std::vector<int> words) {
 int main(int argc, char **argv) {
 	srand(time(NULL));
 
-    std::vector<int> words;
-    long int breaks_trivial, breaks_brute;
-    while (true) {
-        words = generator(WORD_COUNT);
-        breaks_trivial = trivial(words);
-        breaks_brute = brute_force(words);
+    std::vector<int> words = generator(WORD_COUNT);
 
-        if (check_state(words, breaks_trivial) != check_state(words, breaks_brute)) {
-            print_vector(words, 0);
-            print_vector(words, breaks_trivial);
-            print_vector(words, breaks_brute);
-            break;
-        }
-    }
+    print_vector(words, 0);
+    print_vector(words, trivial(words));
+    print_vector(words, brute_force(words));
     
 	return 0;
 }
