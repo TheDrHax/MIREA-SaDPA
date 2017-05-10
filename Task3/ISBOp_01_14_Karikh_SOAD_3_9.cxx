@@ -4,7 +4,6 @@
 
 #define WORD_COUNT 10
 #define LINE_MAX 20
-#define LAST_LINE
 
 #define PRINT(text,count) for (int i = 0; i < count; i++) printf(text);
 
@@ -45,9 +44,7 @@ int check_state(std::vector<int> words, long int state) {
         current_line_size++; // пробел
     }
 
-#ifdef LAST_LINE
     sum += pow((LINE_MAX - current_line_size), 3);
-#endif
     
     return sum;
 }
