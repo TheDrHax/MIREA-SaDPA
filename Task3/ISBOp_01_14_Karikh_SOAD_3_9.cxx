@@ -27,7 +27,7 @@ int check_state(std::vector<int> words, long int state) {
     int current_line_size = 0;
     int sum = 0;
 
-    for (int word = 0; word < WORD_COUNT; word++) {
+    for (unsigned int word = 0; word < words.size(); word++) {
         current_line_size += words[word];
         
         // Превышение размера строки
@@ -61,11 +61,11 @@ void print_vector(std::vector<int> words, long int breaks) {
     printf("%ld (%d)\n", breaks, check_state(words, breaks));
     
     // Проходим по всем словам
-    for (int word = 0; word < WORD_COUNT; word++) {
+    for (unsigned int word = 0; word < words.size(); word++) {
         PRINT("A", words[word]);
         current_line_size += words[word];
         
-        if ((breaks >> word) & 1 || word == WORD_COUNT - 1) {
+        if ((breaks >> word) & 1 || word == words.size() - 1) {
             // Добиваем текущую строку и ставим ограничитель
             PRINT(" ", LINE_MAX - current_line_size);
             printf("| %d\n", LINE_MAX - current_line_size);
@@ -85,7 +85,7 @@ long int trivial(std::vector<int> words) {
     long int solution = 0;
     int current_line_size = 0;
 
-    for (int word = 0; word < WORD_COUNT; word++) {
+    for (unsigned int word = 0; word < words.size(); word++) {
         if (LINE_MAX - current_line_size < words[word]) {
             solution |= 1 << (word - 1);
             current_line_size = 0;
@@ -107,7 +107,7 @@ long int brute_force(std::vector<int> words) {
     int best_quality = -1;
 
     // Перебор всех состояний
-    for (long int state = 0; state < pow(2, WORD_COUNT); state++) {
+    for (long int state = 0; state < pow(2, words.size()); state++) {
         int quality = check_state(words, state);
 
         if (quality == -1) {
