@@ -5,7 +5,7 @@
 #define WORD_COUNT 10
 #define LINE_MAX 20
 
-#define PRINT(text,count) for (int i = 0; i < count; i++) printf(text);
+#define REPEAT(action,count) for (int _i_ = 0; _i_ < count; _i_++) action;
 
 /**
  * Возвращает вектор из N случайных чисел
@@ -59,12 +59,12 @@ void print_vector(std::vector<int> words, long int breaks) {
     
     // Проходим по всем словам
     for (unsigned int word = 0; word < words.size(); word++) {
-        PRINT("A", words[word]);
+        REPEAT(printf("A"), words[word]);
         current_line_size += words[word];
         
         if ((breaks >> word) & 1 || word == words.size() - 1) {
             // Добиваем текущую строку и ставим ограничитель
-            PRINT(" ", LINE_MAX - current_line_size);
+            REPEAT(printf(" "), LINE_MAX - current_line_size);
             printf("| %d\n", LINE_MAX - current_line_size);
             current_line_size = 0;
         } else {
