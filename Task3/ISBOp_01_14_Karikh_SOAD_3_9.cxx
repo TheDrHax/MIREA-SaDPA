@@ -78,7 +78,7 @@ void print_vector(std::vector<int> words, long int breaks) {
 /**
  * Максимально заполняет строки по порядку (не всегда эффективно)
  */
-long int trivial(std::vector<int> words) {
+long int greedy(std::vector<int> words) {
     long int solution = 0;
     int current_line_size = 0;
 
@@ -124,15 +124,15 @@ int main(int argc, char **argv) {
 	srand(time(NULL));
 
     std::vector<int> words;
-    long int breaks_trivial, breaks_brute;
+    long int breaks_greedy, breaks_brute;
     while (true) {
         words = generator(WORD_COUNT);
-        breaks_trivial = trivial(words);
+        breaks_greedy = greedy(words);
         breaks_brute = brute_force(words);
 
-        if (check_state(words, breaks_trivial) != check_state(words, breaks_brute)) {
+        if (check_state(words, breaks_greedy) != check_state(words, breaks_brute)) {
             print_vector(words, 0);
-            print_vector(words, breaks_trivial);
+            print_vector(words, breaks_greedy);
             print_vector(words, breaks_brute);
             break;
         }
