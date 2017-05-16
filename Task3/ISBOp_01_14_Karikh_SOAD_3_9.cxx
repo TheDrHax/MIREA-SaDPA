@@ -139,7 +139,7 @@ long int dynamic(std::vector<int> words) {
     int R[words.size() + 1] = {};
     int B[words.size()] = {};
     for (unsigned int j = 0; j < words.size(); j++) {
-        for (unsigned int i = j; i >= 0; i--) {
+        for (int i = j; i >= 0; i--) {
             // Игнорируем слишком длинные строки
             if (S[i][j] < 0) continue;
 
