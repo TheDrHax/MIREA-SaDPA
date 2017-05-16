@@ -120,6 +120,53 @@ long int brute_force(std::vector<int> words) {
     return best_state;
 }
 
+/**
+ * Восходящий динамический алгоритм
+ */
+long int dynamic(std::vector<int> words) {
+    long int result = 0;
+
+    // Таблица возможных переносов и остатков
+    int S[words.size()][words.size()] = {};
+    for (unsigned int i = 0; i < words.size(); i++) {
+        S[i][i] = LINE_MAX - words[i];
+        for (unsigned int j = i+1; j < words.size(); j++) {
+            S[i][j] = S[i][j-1] - words[j] - 1;
+        }
+    }
+
+    // Идём "по диагонали", подбирая наиболее удачные переносы строк
+    int R[words.size() + 1] = {};
+    int B[words.size()] = {};
+    for (unsigned int j = 0; j < words.size(); j++) {
+        for (unsigned int i = j; i >= 0; i--) {
+            // Игнорируем слишком длинные строки
+            if (S[i][j] < 0) continue;
+
+            int cost = R[i] + pow(S[i][j], 3);
+            if (R[j+1] > cost || R[j+1] == 0) {
+                R[j+1] = cost;
+                B[j] = i;
+            }
+        }
+    }
+
+    // Восстанавливаем код состояния, начиная с последней строки
+    int j = words.size();
+    while (j > 0) {
+        int i = B[j-1];
+        if (result != 0) {
+            result |= 1;
+            result = result << (j-i);
+        } else { // Игнорируем перенос после последней строки
+            result = 1;
+        }
+        j = i;
+    }
+
+    return result >> 1;
+}
+
 int main(int argc, char **argv) {
 	srand(time(NULL));
 
@@ -134,6 +181,7 @@ int main(int argc, char **argv) {
             print_vector(words, 0);
             print_vector(words, breaks_greedy);
             print_vector(words, breaks_brute);
+            print_vector(words, dynamic(words));
             break;
         }
     }
