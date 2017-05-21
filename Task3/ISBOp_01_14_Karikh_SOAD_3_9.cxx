@@ -170,21 +170,11 @@ long int dynamic(std::vector<int> words) {
 int main(int argc, char **argv) {
 	srand(time(NULL));
 
-    std::vector<int> words;
-    long int breaks_greedy, breaks_brute;
-    while (true) {
-        words = generator(WORD_COUNT);
-        breaks_greedy = greedy(words);
-        breaks_brute = brute_force(words);
+    std::vector<int> words = generator(WORD_COUNT);
 
-        if (check_state(words, breaks_greedy) != check_state(words, breaks_brute)) {
-            print_vector(words, 0);
-            print_vector(words, breaks_greedy);
-            print_vector(words, breaks_brute);
-            print_vector(words, dynamic(words));
-            break;
-        }
-    }
+    print_vector(words, greedy(words));
+    print_vector(words, brute_force(words));
+    print_vector(words, dynamic(words));
     
 	return 0;
 }
