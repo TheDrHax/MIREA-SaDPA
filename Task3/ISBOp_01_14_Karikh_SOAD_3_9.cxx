@@ -2,7 +2,7 @@
 #include <vector>
 #include <math.h>
 
-#define WORD_COUNT 10
+#define WORD_COUNT 24
 #define LINE_MAX 20
 
 #define REPEAT(action,count) for (int _i_ = 0; _i_ < count; _i_++) action;
@@ -172,9 +172,17 @@ int main(int argc, char **argv) {
 
     std::vector<int> words = generator(WORD_COUNT);
 
+    long int time = clock();
     print_vector(words, greedy(words));
+    printf("%ld µs\n--\n\n", clock() - time);
+    time = clock();
+
     print_vector(words, brute_force(words));
+    printf("%ld µs\n--\n\n", clock() - time);
+    time = clock();
+
     print_vector(words, dynamic(words));
+    printf("%ld µs\n", clock() - time);
     
 	return 0;
 }
