@@ -12,9 +12,7 @@
  */
 std::vector<int> generator(int N) {
     std::vector<int> result;
-    for (int i = 0; i < N; i++) {
-        result.push_back(rand() % 5 + 3);
-    }
+    REPEAT(result.push_back(rand() % 5 + 3), N);
     return result;
 }
 
